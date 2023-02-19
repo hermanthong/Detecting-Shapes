@@ -153,7 +153,7 @@ def estimate_gradients(original_img, display=True):
     dx = cs4243_filter(img, Kx)
     dy = cs4243_filter(img, Ky)
 
-    d_mag = np.sqrt(dx ** 2 + dy ** 2) * 255
+    d_mag = np.sqrt(dx ** 2 + dy ** 2)
 
     d_angle = np.arctan2(dy, dx)
 
@@ -349,7 +349,13 @@ def double_thresholding(inp, perc_weak=0.1, perc_strong=0.3, display=True):
     weak_edges = strong_edges = None
     
     # YOUR CODE HERE
-    
+    max_val, min_val = np.max(inp), np.min(inp)
+    range = max_val - min_val
+    high_threshold = min_val + perc_strong * range 
+    low_threshold = min_val + perc_weak * range
+
+    weak_edges = np.heaviside(inp - low_threshold, 1)
+    strong_edges = np.heaviside(inp - high_threshold, 1)
     # END
     
     if display:
@@ -389,7 +395,13 @@ def edge_linking(weak, strong, n=200, display=True):
     out = None
     
     # YOUR CODE HERE
+    for _ in range(n):
+        new_pixels = np.heaviside(weak * cs4243_filter(strong, np.array([[1,1,1],[1,0,1],[1,1,1]]) / 8), 0)
+        strong = strong + new_pixels
+        weak = weak - new_pixels
     
+    out = np.heaviside(strong, 0)
+    s = out
     # END
     if display:
         _ = plt.figure(figsize=(10,10))
