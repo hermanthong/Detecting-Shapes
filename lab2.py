@@ -224,7 +224,25 @@ def non_maximum_suppression_interpol(d_mag, d_angle, display=True):
     d_angle_180 = d_angle * 180/np.pi
     
     # YOUR CODE HERE
-
+    H, W = d_mag.shape
+    out = np.zeros((H, W))
+    for i in range(1, H-1):
+        for j in range(1, W-1):
+            if (0 <= d_angle[i,j] < 22.5) or (157.5 <= d_angle[i,j] <= 180):
+                p = d_mag[i, j+1]
+                r = d_mag[i, j-1]
+            elif (22.5 <= d_angle[i,j] < 67.5):
+                p = d_mag[i+1, j+1]
+                r = d_mag[i-1, j-1]
+            elif (67.5 <= d_angle[i,j] < 112.5):
+                p = d_mag[i+1, j]
+                r = d_mag[i-1, j]
+            elif (112.5 <= d_angle[i,j] < 157.5):
+                p = d_mag[i-1, j+1]
+                r = d_mag[i+1, j-1]
+            
+            q = d_mag[i,j]
+            out[i,j] = q if (q >= p) and (q >= r) else 0
     # END
     if display:
         _ = plt.figure(figsize=(10,10))
@@ -272,9 +290,28 @@ def non_maximum_suppression(d_mag, d_angle, display=True):
     out = np.zeros(d_mag.shape, d_mag.dtype)
     # Change angles to degrees to improve quality of life
     d_angle_180 = d_angle * 180/np.pi
- 
     # YOUR CODE HERE
-
+    H, W = d_mag.shape
+    out = np.zeros((H, W))
+    for i in range(1, H-1):
+        for j in range(1, W-1):
+            if (-22.5 <= d_angle_180[i,j] < 22.5) or (157.5 <= d_angle_180[i,j] <= 180) or (-180 <= d_angle_180[i,j] < 157.5):
+                p = d_mag[i-1, j]
+                r = d_mag[i+1, j]
+            elif (22.5 <= d_angle_180[i,j] < 67.5) or (-157.5 <= d_angle_180[i,j] < 112.5):
+                p = d_mag[i+1, j+1]
+                r = d_mag[i-1, j-1]
+            elif (67.5 <= d_angle_180[i,j] < 112.5) or (-67.5 <= d_angle_180[i,j] < -22.5):
+                p = d_mag[i, j-1]
+                r = d_mag[i, j+1]
+            elif (112.5 <= d_angle_180[i,j] < 157.5) or (-112.5 <= d_angle_180[i,j] < -67.5):
+                p = d_mag[i-1, j+1]
+                r = d_mag[i+1, j-1]
+            else:
+                print("Error: angle out of range")
+            
+            q = d_mag[i,j]
+            out[i,j] = q if (q >= p) and (q >= r) else 0
     # END
     if display:
         _ = plt.figure(figsize=(10,10))
