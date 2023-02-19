@@ -23,7 +23,11 @@ def make_gaussian_kernel(ksize, sigma):
     '''
     
     # YOUR CODE HERE
+    center = (ksize - 1) // 2
+    x_mean, y_mean = center, center
 
+    x, y = np.meshgrid(np.arange(ksize) - x_mean, np.arange(ksize) - y_mean)
+    kernel = np.exp((x ** 2 + y ** 2) / (-2 * sigma ** 2))
     # END
 
     return kernel / kernel.sum()
