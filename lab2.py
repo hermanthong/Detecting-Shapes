@@ -228,20 +228,28 @@ def non_maximum_suppression_interpol(d_mag, d_angle, display=True):
     out = np.zeros((H, W))
     for i in range(1, H-1):
         for j in range(1, W-1):
-            if (0 <= d_angle[i,j] < 22.5) or (157.5 <= d_angle[i,j] <= 180):
-                p = d_mag[i, j+1]
-                r = d_mag[i, j-1]
-            elif (22.5 <= d_angle[i,j] < 67.5):
-                p = d_mag[i+1, j+1]
-                r = d_mag[i-1, j-1]
-            elif (67.5 <= d_angle[i,j] < 112.5):
-                p = d_mag[i+1, j]
-                r = d_mag[i-1, j]
-            elif (112.5 <= d_angle[i,j] < 157.5):
-                p = d_mag[i-1, j+1]
-                r = d_mag[i+1, j-1]
-            
+            if (0 <= d_angle_180[i,j] < 45) or (-180 <= d_angle_180[i,j] < -135):
+                p2, p1 = d_mag[i-1, j-1], d_mag[i-1, j]
+                r1, r2 = d_mag[i+1, j], d_mag[i+1, j+1]
+                weight = np.tan(d_angle[i,j] % 45)
+            elif (45 <= d_angle_180[i,j] < 90) or (-135 <= d_angle_180[i,j] < -90):
+                p2, p1 = d_mag[i-1, j-1], d_mag[i, j-1]
+                r1, r2 = d_mag[i+1, j+1], d_mag[i, j+1]
+                weight = 1 - np.tan(45 - (d_angle[i,j] % 45))
+            elif (90 <= d_angle_180[i,j] < 135) or (-90 <= d_angle_180[i,j] < -45):
+                p2, p1 = d_mag[i, j-1], d_mag[i+1, j-1]
+                r1, r2 = d_mag[i, j+1], d_mag[i-1, j+1]
+                weight = np.tan(d_angle[i,j] % 45)
+            elif (135 <= d_angle_180[i,j] <= 180) or (-45 <= d_angle_180[i,j] < 0):
+                p2, p1 = d_mag[i+1, j-1], d_mag[i+1, j]
+                r1, r2 = d_mag[i-1, j+1], d_mag[i-1, j]
+                weight = 1 - np.tan(45 - (d_angle[i,j] % 45))
+            else:
+                print("Error: angle out of range")
+
+            p = weight * p2 + (1 - weight) * p1
             q = d_mag[i,j]
+            r =  weight * r2  + (1 - weight) * r1            
             out[i,j] = q if (q >= p) and (q >= r) else 0
     # END
     if display:
@@ -295,10 +303,10 @@ def non_maximum_suppression(d_mag, d_angle, display=True):
     out = np.zeros((H, W))
     for i in range(1, H-1):
         for j in range(1, W-1):
-            if (-22.5 <= d_angle_180[i,j] < 22.5) or (157.5 <= d_angle_180[i,j] <= 180) or (-180 <= d_angle_180[i,j] < 157.5):
+            if (-22.5 <= d_angle_180[i,j] < 22.5) or (157.5 <= d_angle_180[i,j] <= 180) or (-180 <= d_angle_180[i,j] < -157.5):
                 p = d_mag[i-1, j]
                 r = d_mag[i+1, j]
-            elif (22.5 <= d_angle_180[i,j] < 67.5) or (-157.5 <= d_angle_180[i,j] < 112.5):
+            elif (22.5 <= d_angle_180[i,j] < 67.5) or (-157.5 <= d_angle_180[i,j] < -112.5):
                 p = d_mag[i+1, j+1]
                 r = d_mag[i-1, j-1]
             elif (67.5 <= d_angle_180[i,j] < 112.5) or (-67.5 <= d_angle_180[i,j] < -22.5):
