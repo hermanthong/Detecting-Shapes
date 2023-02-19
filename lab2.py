@@ -136,7 +136,27 @@ def estimate_gradients(original_img, display=True):
     d_angle = None
     
     # YOUR CODE HERE
+    Kx = np.array(
+        [[ 1,  2,  1],
+          [ 0,  0,  0],
+          [-1, -2, -1]]
+    )
     
+    Ky = np.array(
+        [[ 1,  0, -1],
+          [ 2,  0, -2],
+          [ 1,  0, -1]]
+    )
+
+    img = original_img / 255
+    
+    dx = cs4243_filter(img, Kx)
+    dy = cs4243_filter(img, Ky)
+
+    d_mag = np.sqrt(dx ** 2 + dy ** 2) * 255
+
+    d_angle = np.arctan2(dy, dx)
+
     '''
     HINT:
     In the lecture, 
