@@ -396,7 +396,7 @@ def edge_linking(weak, strong, n=200, display=True):
     
     # YOUR CODE HERE
     for _ in range(n):
-        new_pixels = np.heaviside(weak * cs4243_filter(strong, np.array([[1,1,1],[1,0,1],[1,1,1]]) / 8), 0)
+        new_pixels = np.heaviside(weak * cs4243_filter(strong, np.array([[1,1,1],[1,0,1],[1,1,1]])), 0)
         strong = strong + new_pixels
         weak = weak - new_pixels
     
@@ -581,7 +581,7 @@ def hough_vote_circles_grad(img, d_angle, radius = None):
     def round_interval(x):
         return int(np.rint(x/interval_size))
     #1. Initialise arrays
-    interval_size = 1
+    interval_size = 9
     n_radius = round_interval(R_max) + 1
     R = np.arange(start=R_min, stop=R_max+1, step=interval_size)
     X = np.arange(stop=h, step=interval_size)
@@ -593,10 +593,10 @@ def hough_vote_circles_grad(img, d_angle, radius = None):
     for ri, r in enumerate(R):
         for i, j in edges:
             angle = d_angle[i][j]
-            dx = round_interval(r * np.cos(angle))
-            dy = round_interval(r * np.sin(angle))
-            A[ri][n_radius+i+dx][n_radius+j+dy] += 1
-            A[ri][n_radius+i-dx][n_radius+j-dy] += 1
+            dx = r * np.cos(angle)
+            dy = r * np.sin(angle)
+            A[ri][n_radius+round_interval(i+dx)][n_radius+round_interval(j+dy)] += 1
+            A[ri][n_radius+round_interval(i-dx)][n_radius+round_interval(j-dy)] += 1
         
     A = A[:, n_radius:len(X)+n_radius, n_radius:len(Y)+n_radius]
 
