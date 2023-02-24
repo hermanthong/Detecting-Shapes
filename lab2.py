@@ -578,29 +578,28 @@ def hough_vote_circles_grad(img, d_angle, radius = None):
         [R_min,R_max] = radius
     
     # YOUR CODE HERE
-    #1. Initializing accumulator array A.
+    def round_interval(x):
+        return int(np.rint(x/interval_size))
+    #1. Initialise arrays
     interval_size = 1
-    n_radius = int(np.rint(R_max / interval_size)) + 1
-    R = np.arange(start=R_min, stop=R_max + 1, step=interval_size)
+    n_radius = round_interval(R_max) + 1
+    R = np.arange(start=R_min, stop=R_max+1, step=interval_size)
     X = np.arange(stop=h, step=interval_size)
     Y = np.arange(stop=w, step=interval_size)
     A = np.zeros((len(R), len(X) + 2 * n_radius, len(Y) + 2 * n_radius))
-
-    def round_interval(x):
-        return int(np.rint(x/interval_size))
     #2. Extracting all edge coordinates
     edges = [(i, j) for j in range(len(img[0])) for i in range(len(img)) if img[i][j] == 1]
     #3. For each radius: For each edge: Add votes to the accumulator array 
     for ri, r in enumerate(R):
         for i, j in edges:
             angle = d_angle[i][j]
-            dx = r * np.cos(angle)
-            dy = r * np.sin(angle)
-            A[ri][round_interval(i+dx)][round_interval(j+dy)] += 1
-            A[ri][round_interval(i-dx)][round_interval(j-dy)] += 1
+            dx = round_interval(r * np.cos(angle))
+            dy = round_interval(r * np.sin(angle))
+            A[ri][n_radius+i+dx][n_radius+j+dy] += 1
+            A[ri][n_radius+i-dx][n_radius+j-dy] += 1
         
     A = A[:, n_radius:len(X)+n_radius, n_radius:len(Y)+n_radius]
-    
+
     # END
     return A, R, X, Y
 
